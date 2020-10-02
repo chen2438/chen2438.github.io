@@ -18,4 +18,4 @@ Welcome to 追殇's Blog！
 
 ### License
 
-MIT License, please refer to [LICENSE](https://github.com/globien/globien.github.io/blob/master/LICENSE).
+MIT License, please refer to [LICENSE](https://github.com/chen2438/chen2438.github.io/blob/master/LICENSE).
