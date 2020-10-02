@@ -12,7 +12,7 @@ github_repo: "https://github.com/chen2438/chen2438.github.io.git" # you code rep
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "星海横流，岁月成碑"
-sidebar-avatar: /img/about-HJ.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: /img/Avatar-Zhui_Shang.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
 
@@ -99,10 +99,10 @@ service-worker: true
 # Friends
 friends: [
     {
-        title: "Globien Wiki Dictionary",
-        href: "https://github.com/globien/globien.github.io/wiki"
+        title: "哔哩哔哩",
+        href: "https://space.bilibili.com/180296201"
     },{
-        title: "Globien Community",
+        title: "Github",
         href: "https://globien.fandom.com/wiki/Globien_Wiki"
     },{
         title: "知乎：人造国际语",
