@@ -1,11 +1,11 @@
 # Site settings
-title: Globien Interlingu
-SEOTitle: Globien - Makes Communication Easier
+title: 追殇
+SEOTitle: 追殇's Blog
 header-img: img/post-bg-desk.jpg
-email: globien@outlook.com
-description: "Easy to learn, no more hard work to recite vocabulary."
-keyword: "Constructed Language, Ligua Franca, Interlingua, Globien"
-url: "https://globien.github.io"          # your host, for absolute URL
+email: chen1237@foxmail.com
+description: "追殇的实验性博客"
+keyword: "追殇的实验性博客 - 正在施工"
+url: "https://chen2438.github.io"          # your host, for absolute URL
 baseurl: ""      # for example, '/blog' if your blog hosted on 'host/blog'
 github_repo: "https://github.com/globien/globien.github.io.git" # you code repository
 
