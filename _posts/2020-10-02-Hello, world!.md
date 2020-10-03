@@ -11,5 +11,5 @@ tags:
 ---
 # 建站引言
 
-本博客建立于 2020.10.2 ，基于 Github 搭建。
+本博客建立于 `2020.10.2` ，基于 [Github](https://github.com/chen2438/chen2438.github.io) 搭建。
 目前正在完善中
