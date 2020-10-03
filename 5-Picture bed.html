@@ -40,24 +40,24 @@ header-img: "img/post-bg-rwd.jpg"
             </blockquote>-->
 
             <!-- 标签列表 -->
-            {% for tag in site.tags %}
+            {% for tag in screenshots.tags %}
             <div class="one-tag-list">
                 <span class="fa fa-tag listing-seperator" id="{{ tag[0] }}">
                     <span class="tag-text">{{ tag[0] }}</span>
                 </span>
-                {% for post in tag[1] %}
+                {% for screenshots in tag[1] %}
                   <!-- <li class="listing-item">
                   <time datetime="{{ post.date | date:"%Y-%m-%d" }}">{{ post.date | date:"%Y-%m-%d" }}</time>
                   <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
                   </li> -->
-                 <div class="post-preview">
-                    <a href="{{ post.url | prepend: site.baseurl }}">
-                        <h2 class="post-title">
-                            {{ post.title }}
+                 <div class="screenshots-preview">
+                    <a href="{{ screenshots.url | prepend: site.baseurl }}">
+                        <h2 class="screenshots-title">
+                            {{ screenshots.title }}
                         </h2>
-                        {% if post.subtitle %}
-                        <h3 class="post-subtitle">
-                            {{ post.subtitle }}
+                        {% if screenshots.subtitle %}
+                        <h3 class="screenshots-subtitle">
+                            {{ screenshots.subtitle }}
                         </h3>
                         {% endif %}
                     </a>
