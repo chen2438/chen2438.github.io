@@ -12,7 +12,7 @@ github_repo: "https://github.com/chen2438/chen2438.github.io.git" # you code rep
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "星海横流，岁月成碑"
-sidebar-avatar: /img/Avatar-chenhaotian.jpg      # 头像
+sidebar-avatar: https://s1.ax1x.com/2020/10/04/08zdtf.png      # 头像
 
 
 
