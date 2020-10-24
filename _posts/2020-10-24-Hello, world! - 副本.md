@@ -11,11 +11,11 @@ tags:
 ---
 # X264码率控制总结1——ABR,CQP,CRF
 
-参考：https://blog.csdn.net/tanningzhong/article/details/51545389
+    参考：https://blog.csdn.net/tanningzhong/article/details/51545389
 
-1.  X264显式支持的一趟码率控制方法有：ABR, CQP, CRF. 缺省方法是CRF。这三种方式的优先级是ABR > CQP > CRF.
+-  `X264` 显式支持的一趟码率控制方法有：`ABR`, `CQP`, `CRF`. 缺省（即默认）方法是`CRF`。这三种方式的优先级是 `ABR` > `CQP` > `CRF`.
  
-    bitrate和QP都没有缺省值，一旦设置他们就表示要按照相应的码率控制方法进行编码，CRF有缺省值23，没有任何关于编码控制的设置时就按照CRF缺省值23来编码。
+    `bitrate` 和 `QP` 都没有缺省值，一旦设置他们就表示要按照相应的码率控制方法进行编码，CRF有缺省值23，没有任何关于编码控制的设置时就按照CRF缺省值23来编码。
 
     一般的使用建议：
 
