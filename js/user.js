@@ -39,20 +39,40 @@ function updateConfig(userData, inputID, deptOBJ) {
     userName.textContent = '魏明铭';
     if (inputID == -1) {
         alert('未配置 Student ID');
-        return;
     }
-    var found = 0;
-    for (let i = 0; i < userData.length; i++) {
-        if (userData[i] == null) continue;
-        if (userData[i]["学号"] == inputID) {
-            found = 1;
-            userName.textContent = userData[i]["姓名"];
-            userID.textContent = '学工号：' + userData[i]["学号"];
-            userDept.textContent = '学院/班级：' + deptOBJ[userData[i]["分流专业"]];
-            return;
+    else {
+        var found = 0;
+        for (let i = 0; i < userData.length; i++) {
+            if (userData[i] == null) continue;
+            if (userData[i]["学号"] == inputID) {
+                found = 1;
+                userName.textContent = userData[i]["姓名"];
+                userID.textContent = '学工号：' + userData[i]["学号"];
+                userDept.textContent = '学院/班级：' + deptOBJ[userData[i]["分流专业"]];
+                break;
+            }
+        }
+        if (found == 0) {
+            alert('未找到匹配的 Student Name');
         }
     }
-    if (found == 0) {
-        alert('未找到匹配的 Student Name');
+    userName.addEventListener('click', updateName);
+    userID.addEventListener('click', updateID);
+    userDept.addEventListener('click', updateDept);
+
+    function updateName() {
+        let upd = prompt('手动更新姓名：');
+        userName.textContent = upd;
+    }
+    function updateID() {
+        let upd = prompt('手动更新学号：');
+        userID.textContent = '学工号：' + upd;
+    }
+    function updateDept() {
+        let upd = prompt('手动更新学院：');
+        userDept.textContent = '学院/班级：' + upd;
     }
 }
+
+
+
