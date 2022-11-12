@@ -1,51 +1,387 @@
 <!DOCTYPE html>
-<html lang="zh-cn">
 
-<head>
-    <meta charset="utf-8">
-    <meta name="author" content="Nanmener">
-    <meta name="description" content="template">
-    <meta name="viewport" content="width=device-width">
-    <link rel="icon" href="https://picgo-1303840613.cos.ap-shanghai.myqcloud.com/media/追殇.jpg" type="image/x-icon">
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
-    <title>Title</title>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>&#x5B66;&#x751F;&#x901A;&#x884C;&#x7801;</title>
+    <link href="/yqfk/css/layer.css" type="text/css" rel="stylesheet" />
+    <link href="/yqfk/css/main.css?v=(20221112)" type="text/css" rel="stylesheet" />
+    <script src="/yqfk/js/layer.js" type="text/javascript"></script>
+    <script src="/lib/jquery/jquery.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        let _data = { "Hs": [{ "Prm1": "2022-10-22 00:20:36", "Prm2": "阴性", "Prm3": null, "Prm4": null }], "Ym": [{ "Prm1": "2022-02-12", "Prm2": "第3针", "Prm3": null, "Prm4": null }, { "Prm1": "2021-07-27", "Prm2": "第2针", "Prm3": null, "Prm4": null }, { "Prm1": "2021-07-03", "Prm2": "第1针", "Prm3": null, "Prm4": null }], "Jkm": [{ "Prm1": "2022-10-06 09:45:49", "Prm2": "杭州市", "Prm3": "绿码", "Prm4": null }, { "Prm1": "2021-07-28 14:43:00", "Prm2": "衢州市", "Prm3": "绿码", "Prm4": null }, { "Prm1": "2021-02-10 16:04:58", "Prm2": "金华市", "Prm3": "绿码", "Prm4": null }], "Txm": [{ "Prm1": "2022-09-02", "Prm2": "2023-01-06", "Prm3": "启用", "Prm4": null }], "Xcm": [] };
+        $(() => {
+            $("html").css("background-color", "#b8e8f9");
+            getTime();
+            setInterval(() => {
+                getTime();
+            }, 1000);
+            // 定时刷新页面
+            //setTimeout(()=>{
+            //    location.reload();
+            //},1000 * 60)
+
+        });
+        function getTime() {
+            var date = new Date();
+            var year = date.getFullYear();
+            var month = date.getMonth() + 1;
+            var day = date.getDate();
+            var hour = date.getHours();
+            var minute = date.getMinutes();
+            var second = date.getSeconds();
+
+            if (hour.toString().length < 2)
+                hour = "0" + hour;
+            if (minute.toString().length < 2)
+                minute = "0" + minute;
+            if (second.toString().length < 2)
+                second = "0" + second;
+
+            $("#sj").text(month + "月" + day + "日  " + hour + ":" + minute + ":" + second);
+        }
+        function GetInfo(tag) {
+            let info = eval("_data." + tag);
+            var html = "<div class='tips-info'>";
+            if (tag == 'Hs') {
+                html += "<div class='tips-title'><div>核酸检测时间</div><div>结果</div></div>";
+            }
+            if (tag == 'Ym') {
+                html += "<div class='tips-title'><div>疫苗接种时间</div><div>针数</div></div>";
+            }
+            if (tag == 'Jkm') {
+                html += "<div class='tips-title'><div>最近更新时间</div><div>码发放地</div><div>码状态</div></div>";
+            }
+            if (tag == 'Txm') {
+                html += "<div class='tips-title'><div>开始时间</div><div>结束时间</div><div>状态</div></div>";
+            }
+            for (let i = 0; i < info.length; i++) {
+                html += `<div class='tips-content'>`
+                    + `<div>` + info[i].Prm1 + `</div>`
+                    + `<div>` + info[i].Prm2 + `</div>`
+                    + (info[i].Prm3 == null ? `` : "<div>" + info[i].Prm3 + "</div>")
+                    + `</div>`;
+            }
+            //if (tag == 'Jkm') {
+            //    html += '<span style="color:blue;font-size:40px;text-decoration:underline;" onclick="handle_refresh()">点击刷新健康码信息<span>';
+            //}
+            html += "</div>"
+            alertOpen(html);
+        }
+        let lOpen;
+        //弹出内容
+        function alertOpen(html) {
+            lOpen = layer.open({
+                shadeClose: true
+                , content: html
+                , anim: 'up'
+                , style: 'position:fixed; left:3%; top:500px; width:94%; height:700px; border: none; -webkit-animation-duration: .5s; animation-duration: .5s; border-radius: 25px;'
+            })
+        }
+        function alertTips(content) {
+            //提示
+            layer.open({
+                content: "<span style='font-size: 35px;'>" + content + "</span>"
+                , skin: 'msg'
+                , time: 2 //2秒后自动关闭
+            });
+        }
+        //32位随机字符串
+        function getGuid() {
+            var oStr = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', oChar = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', len = oChar.length;
+            return oStr.replace(/x/g, (match) => {
+                return oChar.charAt(Math.floor(Math.random() * len));
+            });
+        }
+        //获取验证码
+        function getCode() {
+            let sjh = $('.layui-m-layercont').find("input[name='sjh']").eq(0).val();
+            if (!isPhoneNum(sjh)) {
+                alertTips("请输入正确的手机号码！！");
+                return;
+            }
+            let queryId = getGuid();
+            $("#queryId").val(queryId);
+            let sendTime = "2022-11-12 12:44:45";
+            $("#sendTime").val(sendTime);
+            let timeNum = 60, setText = (start) => {
+                let btn = $('.layui-m-layercont').find("span[name='btn_yzm']").eq(0);
+                btn.html(start ? timeNum : --timeNum);
+                btn.addClass("disabled2");
+
+                if (timeNum <= 0) {
+                    clearInterval(this.timer);
+                    btn.removeClass("disabled2");
+                    btn.html("重新获取");
+                };
+            };
+            setText(!0);
+            this.timer = setInterval(setText, 1000);
+
+            let loadingOpen;
+            $.ajax({
+                url: "/AdultPass/GetVerification",
+                type: "POST",
+                data: {
+                    sjh: sjh,
+                    queryId: queryId,
+                    sendTime: sendTime
+                },
+                beforeSend: () => {
+                    loadingOpen = layer.open({ type: 2 });
+                },
+                success: (ret, status) => {
+                    layer.close(loadingOpen);
+                    if (status == "success" && ret && ret.code == '00') {
+                        try {
+                            let datas = JSON.parse(ret.datas);
+                            if (datas && datas.code == 200) {
+                                if (datas.data && datas.data.code == '00' && datas.data.result) {
+                                    alertTips(datas.data.result);
+                                } else {
+                                    alertTips(datas.data.errorDesc);
+                                }
+                            }
+                            else {
+                                alertTips("短信发送失败！");
+                            }
+                        } catch (e) {
+                            alertTips("短信发送失败！");
+                        }
+                    }
+                    else {
+                        alertTips("短信发送失败！");
+                    }
+                },
+                error: function (obj) {
+                    layer.close(loadingOpen);
+                    alertTips("短信发送失败！");
+                },
+                dataType: "json",
+                async: true
+            });
+        }
+        function getXcm() {
+            let sjh = $('.layui-m-layercont').find("input[name='sjh']").eq(0).val();
+            let yzm = $('.layui-m-layercont').find("input[name='yzm']").eq(0).val();
+            let queryId = $("#queryId").val() == '' ? getGuid() : $("#queryId").val();
+            let sendTime = $("#sendTime").val() == '' ? "2022-11-12 12:44:45" : $("#sendTime").val();
+
+            if (!isPhoneNum(sjh)) {
+                alertTips("请输入正确的手机号码！！");
+                return;
+            }
+            if (!(yzm && yzm.length == 6)) {
+                alertTips("请输入正确的短信验证码！！");
+                return;
+            }
+            let loadingOpen;
+            $.ajax({
+                url: "/AdultPass/GetXcm",
+                type: "POST",
+                data: {
+                    sjh: sjh,
+                    queryId: queryId,
+                    sendTime: sendTime,
+                    verification: yzm
+                },
+                beforeSend: () => {
+                    loadingOpen = layer.open({ type: 2 });
+                },
+                success: (ret, status) => {
+                    layer.close(loadingOpen);
+                    if (status == "success" && ret && ret.code == '00') {
+                        try {
+                            let datas = JSON.parse(ret.datas);
+                            if (datas && datas.code == 200) {
+                                if (datas.data && datas.data.code == '00' && datas.data.result) {
+                                    alertTips("查询成功！");
+                                    let _hy = $("#xcm-hy");
+                                    let _h = `<div class="xcm-jg">` + (datas.data.result.value == "1" ? "更新时间：2022-11-12" : (datas.data.result.value == "2" ? "途经中高风险地区" : "没有行程记录")) + `</div>`;
+                                    _hy.html(_h);
+                                    $(".xcm-top-img>img").attr("src", (datas.data.result.value == "1" ? "/yqfk/img/go.png" : (datas.data.result.value == "2" ? "/yqfk/img/notgo.png" : "/yqfk/img/isgo.png")))
+                                    layer.close(lOpen);
+                                    $.post("/AdultPass/InsertXcm", {
+                                        sjh: sjh,
+                                        sendTime: sendTime,
+                                        jg: datas.data.result.value
+                                    });
+                                } else {
+                                    alertTips(datas.data.errorDesc);
+                                }
+                            } else {
+                                alertTips("查询数据失败！！");
+                            }
+                        } catch (e) {
+                            alertTips("查询数据失败！");
+                        }
+                    } else {
+                        alertTips("查询数据失败！");
+                    }
+                },
+                error: function (obj) {
+                    layer.close(loadingOpen);
+                    alertTips("查询数据失败！");
+                },
+                dataType: "json",
+                async: true
+            });
+        }
+        //授权
+        function isCheck(e) {
+            if (e.checked) {
+                $('.layui-m-layercont').find(".hy-cx").eq(0).removeClass("disabled1");
+            } else {
+                $('.layui-m-layercont').find(".hy-cx").eq(0).addClass("disabled1");
+            }
+        }
+        //手机号码 正则
+        function isPhoneNum(phone) {
+            var reg = /^1(3\d|4[5-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/;
+            return reg.test(phone);
+        }
+        //刷新健康码
+        function refreshJkm() {
+            $.ajax({
+                url: "/TchPassCode/RefreshJkm",
+                type: "POST",
+                success: function (msgBody) {
+                    var data = $.parseJSON(msgBody);
+                    if (data.Code == 1) {
+                        alertTips(data.Message);
+                        setTimeout(() => { location.reload() }, 500);
+                    }
+                    else {
+                        alertTips(data.Message);
+                    }
+                }
+            })
+        }
+        const handle_refresh = debounce(() => {
+            refreshJkm();
+        }, 1000);
+        /*
+         * fn [function] 需要防抖的函数
+         * delay [number] 毫秒，防抖期限值
+         */
+        function debounce(fn, delay) {
+            let timer = null; //借助闭包
+            return function () {
+                if (timer) {
+                    clearTimeout(timer); //进入该分支语句，说明当前正在一个计时过程中，并且又触发了相同事件。所以要取消当前的计时，重新开始计时
+                    timer = setTimeout(fn, delay);
+                } else {
+                    timer = setTimeout(fn, delay); // 进入该分支说明当前并没有在计时，那么就开始一个计时
+                }
+            };
+        }
+    </script>
 </head>
 
 <body>
-    <header>
-        <!--页眉-->
-        <h1>Header</h1>
-    </header>
-    <nav>
-        <!--导航-->
-        <ul>
-            <li><a href="#">主页</a></li>
-            <li><a href="#">项目</a></li>
-            <li><a href="#">联系我们</a></li>
-        </ul>
-        <form>
-            <input type="search" name="q" placeholder="要搜索的内容">
-            <input type="submit" value="搜索">
-        </form>
-    </nav>
-    <main>
-        <article>
-            <h2>h2</h2>
-            <p>p</p>
-        </article>
-        <aside>
-            <h2>相关链接</h2>
-            <ul>
-                <li><a href="#">言和</a></li>
-                <li><a href="#">乐正绫</a></li>
-            </ul>
-        </aside>
-    </main>
-    <footer>
-        <!--页脚-->
-        <p>© 2050 保留所有权利 | 宇 PPP 备 0054444944 号</p>
-    </footer>
+    <div style="width: 100%;">
+        <!-- 个人信息 -->
+        <div class="top-body">
+            <div class="top-info"
+                style="background: url('/yqfk/img/card.png') no-repeat; background-size: 100%; background-position: center;">
+                <div class="top-banner">
+                    <img src='/yqfk/img/schoolname.png'><br />
+                </div>
+                <div class="top-xm">
+                    &#x9648;&#x660A;&#x5929; &nbsp;&nbsp;<span>&#x5B66;&#x751F;</span>
+                </div>
+                <div class="top-xgh">
+                    学工号：2021329600006
+                </div>
+                <div class="top-dw">
+                    学院/班级：&#x8BA1;&#x7B97;&#x673A;&#x79D1;&#x5B66;&#x4E0E;&#x6280;&#x672F;&#x5B66;&#x9662;&#xFF08;&#x4EBA;&#x5DE5;&#x667A;&#x80FD;&#x5B66;&#x9662;&#xFF09;
+                </div>
+                <div class="top-dw" onclick="GetInfo('Txm')">
+                    通行时间：<span style="text-decoration: underline">2022-09-02&#x81F3;2023-01-06</span>
+                </div>
+            </div>
+        </div>
+        <!-- 中间内容 -->
+        <div class="mid-info">
+            <div class="mid-time" onclick="window.location.reload();">
+                <span id="rq"></span>
+                <span id="sj"
+                    style="background: url('/yqfk/img/refresh.png') no-repeat; background-size: 55px; background-position: right;padding:0 70px 0 70px; "></span>
+            </div>
+            <!-- 二维码 -->
+            <div class="mid-ewm">
+                <img id="ewm"
+                    src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAtAAAALQCAYAAAC5V0ecAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAIABJREFUeJztlsER7UYMw341aSaFpsykhezTAcYQmOFZIley9effiIiIiIj43/yhG4iIiIiIMNEBHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQDHdAREREREQ90QEdEREREPNABHRERERHxQAd0RERERMQD8wf0X//8ncRaZz1/2r9ddP526Pez50/7T&#x2B;75oemA/sAQphb4V9bzp/3bRedvh34/e/60/&#x2B;SeH5oO6A8MYWqBf2U9f9q/XXT&#x2B;duj3s&#x2B;dP&#x2B;0/u&#x2B;aHpgP7AEKYW&#x2B;FfW86f920Xnb4d&#x2B;P3v&#x2B;tP/knh&#x2B;aDugPDGFqgX9lPX/av110/nbo97PnT/tP7vmh6YD&#x2B;wBCmFvhX1vOn/dtF52&#x2B;Hfj97/rT/5J4fmg7oDwxhaoF/ZT1/2r9ddP526Pez50/7T&#x2B;75oemA/sAQphb4V9bzp/3bRedvh34/e/60/&#x2B;SeH5oO6A8MYWqBf2U9f9q/XXT&#x2B;duj3s&#x2B;dP&#x2B;0/u&#x2B;aHpgP7AEKYW&#x2B;FfW86f920Xnb4d&#x2B;P3v&#x2B;tP/knh&#x2B;aDugPDGFqgX9lPX/av110/nbo97PnT/tP7vmh6YD&#x2B;wBCmFvhX1vOn/dtF52&#x2B;Hfj97/rT/5J4fmg7oDwxhaoF/ZT1/2r9ddP526Pez50/7T&#x2B;75oemA/sAQphb4V9bzp/3bRedvh34/e/60/&#x2B;SeH5oO6A8MYWqBf2U9f9q/XXT&#x2B;duj3s&#x2B;dP&#x2B;0/u&#x2B;aHpgP7AEKYW&#x2B;FfW86f920Xnb4d&#x2B;P3v&#x2B;tP/knh&#x2B;aDugGCMWeP/0Bo/Oj669jn591/9V3z5&#x2B;d8r/RAd0Aodjzp3/gdH50/XXs87Puv/ru&#x2B;bNT/jc6oBsgFHv&#x2B;9A&#x2B;czo&#x2B;uv459ftb9V989f3bK/0YHdAOEYs&#x2B;f/oHT&#x2B;dH117HPz7r/6rvnz0753&#x2B;iAboBQ7PnTP3A6P7r&#x2B;Ovb5Wfdffff82Sn/Gx3QDRCKPX/6B07nR9dfxz4/6/6r754/O&#x2B;V/owO6AUKx50//wOn86Prr2Odn3X/13fNnp/xvdEA3QCj2/OkfOJ0fXX8d&#x2B;/ys&#x2B;6&#x2B;&#x2B;e/7slP&#x2B;NDugGCMWeP/0Dp/Oj669jn591/9V3z5&#x2B;d8r/RAd0Aodjzp3/gdH50/XXs87Puv/ru&#x2B;bNT/jc6oBsgFHv&#x2B;9A&#x2B;czo&#x2B;uv459ftb9V989f3bK/0YHdAOEYs&#x2B;f/oHT&#x2B;dH117HPz7r/6rvnz0753&#x2B;iAboBQ7PnTP3A6P7r&#x2B;Ovb5Wfdffff82Sn/Gx3QDRCKPX/6B07nR9dfxz4/6/6r754/O&#x2B;V/owO6AUKx50//wOn86Prr2Odn3X/13fNnp/xvdEA3QCj2/OkfOJ0fXX8d&#x2B;/ys&#x2B;6&#x2B;&#x2B;e/7slP&#x2B;NDmj5B4QW7b/6LPT80fnR/dtFQ/df/tv52/2v0wEtH2BatP/qs9DzR&#x2B;dH928XDd1/&#x2B;W/nb/e/Tge0fIBp0f6rz0LPH50f3b9dNHT/5b&#x2B;dv93/Oh3Q8gGmRfuvPgs9f3R&#x2B;dP920dD9l/92/nb/63RAyweYFu2/&#x2B;iz0/NH50f3bRUP3X/7b&#x2B;dv9r9MBLR9gWrT/6rPQ80fnR/dvFw3df/lv52/3v04HtHyAadH&#x2B;q89Czx&#x2B;dH92/XTR0/&#x2B;W/nb/d/zod0PIBpkX7rz4LPX90fnT/dtHQ/Zf/dv52/&#x2B;t0QMsHmBbtv/os9PzR&#x2B;dH920VD91/&#x2B;2/nb/a/TAS0fYFq0/&#x2B;qz0PNH50f3bxcN3X/5b&#x2B;dv979OB7R8gGnR/qvPQs8fnR/dv100dP/lv52/3f86HdDyAaZF&#x2B;68&#x2B;Cz1/dH50/3bR0P2X/3b&#x2B;dv/rdEDLB5gW7b/6LPT80fnR/dtFQ/df/tv52/2v0wEtH2BatP/qs9DzR&#x2B;dH928XDd1/&#x2B;W/nb/e/Tge0fIBp0f6rz0LPH50f3b9dNHT/5b&#x2B;dv93/Oh3Q8gGmRfuvPgs9f3R&#x2B;dP920dD9l/92/nb/63RAyweYFu1/HTo/&#x2B;/zRlJ8b&#x2B;v1o0fnR9WnR/tfpgJYPMC3a/zp0fvb5oyk/N/T70aLzo&#x2B;vTov2v0wEtH2BatP916Pzs80dTfm7o96NF50fXp0X7X6cDWj7AtGj/69D52eePpvzc0O9Hi86Prk&#x2B;L9r9OB7R8gGnR/teh87PPH035uaHfjxadH12fFu1/nQ5o&#x2B;QDTov2vQ&#x2B;dnnz&#x2B;a8nNDvx8tOj&#x2B;6Pi3a/zod0PIBpkX7X4fOzz5/NOXnhn4/WnR&#x2B;dH1atP91OqDlA0yL9r8OnZ99/mjKzw39frTo/Oj6tGj/63RAyweYFu1/HTo/&#x2B;/zRlJ8b&#x2B;v1o0fnR9WnR/tfpgJYPMC3a/zp0fvb5oyk/N/T70aLzo&#x2B;vTov2v0wEtH2BatP916Pzs80dTfm7o96NF50fXp0X7X6cDWj7AtGj/69D52eePpvzc0O9Hi86Prk&#x2B;L9r9OB7R8gGnR/teh87PPH035uaHfjxadH12fFu1/nQ5o&#x2B;QDTov2vQ&#x2B;dnnz&#x2B;a8nNDvx8tOj&#x2B;6Pi3a/zod0PIBpkX7X4fOzz5/NOXnhn4/WnR&#x2B;dH1atP91OqDlA0yL9r8OnZ99/mjKzw39frTo/Oj6tGj/63RAyweYFu2frk/3T1N&#x2B;N9b9X1nPz75/9vq0aP/rdEDLB5gW7Z&#x2B;uT/dPU3431v1fWc/Pvn/2&#x2B;rRo/&#x2B;t0QMsHmBbtn65P909TfjfW/V9Zz8&#x2B;&#x2B;f/b6tGj/63RAyweYFu2frk/3T1N&#x2B;N9b9X1nPz75/9vq0aP/rdEDLB5gW7Z&#x2B;uT/dPU3431v1fWc/Pvn/2&#x2B;rRo/&#x2B;t0QMsHmBbtn65P909TfjfW/V9Zz8&#x2B;&#x2B;f/b6tGj/63RAyweYFu2frk/3T1N&#x2B;N9b9X1nPz75/9vq0aP/rdEDLB5gW7Z&#x2B;uT/dPU3431v1fWc/Pvn/2&#x2B;rRo/&#x2B;t0QMsHmBbtn65P909TfjfW/V9Zz8&#x2B;&#x2B;f/b6tGj/63RAyweYFu2frk/3T1N&#x2B;N9b9X1nPz75/9vq0aP/rdEDLB5gW7Z&#x2B;uT/dPU3431v1fWc/Pvn/2&#x2B;rRo/&#x2B;t0QMsHmBbtn65P909TfjfW/V9Zz8&#x2B;&#x2B;f/b6tGj/63RAyweYFu2frk/3T1N&#x2B;N9b9X1nPz75/9vq0aP/rdEDLB5gW7Z&#x2B;uT/dPU3431v1fWc/Pvn/2&#x2B;rRo/&#x2B;t0QMsHmBbtn65P909TfjfW/V9Zz8&#x2B;&#x2B;f/b6tGj/63RAyweYFu2frk/3T1N&#x2B;N9b9X1nPz75/9vq0aP/rdEA3QCh0/vb6dtHY/a/3b69PQ/un669T/jc6oBsgFDp/e327aOz&#x2B;1/u316eh/dP11yn/Gx3QDRAKnb&#x2B;9vl00dv/r/dvr09D&#x2B;6frrlP&#x2B;NDugGCIXO317fLhq7//X&#x2B;7fVpaP90/XXK/0YHdAOEQudvr28Xjd3/ev/2&#x2B;jS0f7r&#x2B;OuV/owO6AUKh87fXt4vG7n&#x2B;9f3t9Gto/XX&#x2B;d8r/RAd0AodD52&#x2B;vbRWP3v96/vT4N7Z&#x2B;uv0753&#x2B;iAboBQ6Pzt9e2isftf799en4b2T9dfp/xvdEA3QCh0/vb6dtHY/a/3b69PQ/un669T/jc6oBsgFDp/e327aOz&#x2B;1/u316eh/dP11yn/Gx3QDRAKnb&#x2B;9vl00dv/r/dvr09D&#x2B;6frrlP&#x2B;NDugGCIXO317fLhq7//X&#x2B;7fVpaP90/XXK/0YHdAOEQudvr28Xjd3/ev/2&#x2B;jS0f7r&#x2B;OuV/owO6AUKh87fXt4vG7n&#x2B;9f3t9Gto/XX&#x2B;d8r/RAd0AodD52&#x2B;vbRWP3v96/vT4N7Z&#x2B;uv0753&#x2B;iAboBQ6Pzt9e2isftf799en4b2T9dfp/xvdEDDP6DELnD1q1/96lffWT&#x2B;xWqcD&#x2B;gNDmLgFrn71q1/96jvrJ1brdEB/YAgTt8DVr371q199Z/3Eap0O6A8MYeIWuPrVr371q&#x2B;&#x2B;sn1it0wH9gSFM3AJXv/rVr371nfUTq3U6oD8whIlb4OpXv/rVr76zfmK1Tgf0B4YwcQtc/epXv/rVd9ZPrNbpgP7AECZugatf/epXv/rO&#x2B;onVOh3QHxjCxC1w9atf/epX31k/sVqnA/oDQ5i4Ba5&#x2B;9atf/eo76ydW63RAf2AIE7fA1a9&#x2B;9atffWf9xGqdDugPDGHiFrj61a9&#x2B;9avvrJ9YrdMB/YEhTNwCV7/61a9&#x2B;9Z31E6t1OqA/MISJW&#x2B;DqV7/61a&#x2B;&#x2B;s35itU4H9AeGMHELXP3qV7/61XfWT6zW6YD&#x2B;wBAmboGrX/3qV7/6zvqJ1TrzB3TEhfUPkN2/vX8aOj/6gKD9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB3TEgfUfqN2/vX8aOj/6AKb9RwRHB/QR&#x2B;weU7n&#x2B;9vp0OkBt0frTs0P7p91v3T/cfLB3QR&#x2B;wLQPe/Xt&#x2B;O/QdGQ&#x2B;dHyw7tn36/df90/8HSAX3EvgB0/&#x2B;v17dh/YDR0frTs0P7p91v3T/cfLB3QR&#x2B;wLQPe/Xt&#x2B;O/QdGQ&#x2B;dHyw7tn36/df90/8HSAX3EvgB0/&#x2B;v17dh/YDR0frTs0P7p91v3T/cfLB3QR&#x2B;wLQPe/Xt&#x2B;O/QdGQ&#x2B;dHyw7tn36/df90/8HSAX3EvgB0/&#x2B;v17dh/YDR0frTs0P7p91v3T/cfLB3QR&#x2B;wLQPe/Xt&#x2B;O/QdGQ&#x2B;dHyw7tn36/df90/8HSAX3EvgB0/&#x2B;v17dh/YDR0frTs0P7p91v3T/cfLB3QR&#x2B;wLQPe/Xt&#x2B;O/QdGQ&#x2B;dHyw7tn36/df90/8HSAX3EvgB0/&#x2B;v17dh/YDR0frTs0P7p91v3T/cfLB3QR&#x2B;wLQPe/Xt&#x2B;O/QdGQ&#x2B;dHyw7tn36/df90/8HSAX3EvgB0/&#x2B;v17dh/YDR0frTs0P7p91v3T/cfLB3QR&#x2B;wLQPe/Xt&#x2B;O/QdGQ&#x2B;dHyw7tn36/df90/8HSAX3EvgB0/&#x2B;v17dh/YDR0frTs0P7p91v3T/cfLB3QR&#x2B;wLQPe/Xt&#x2B;O/QdGQ&#x2B;dHyw7tn36/df90/8Eyf0DbF5D2T0P3T9e3Y8/P3j8N/f21y47dv73/uNEBPf4BrH93fTv2/Oz909DfX7vs2P3b&#x2B;48bHdDjH8D6d9e3Y8/P3j8N/f21y47dv73/uNEBPf4BrH93fTv2/Oz909DfX7vs2P3b&#x2B;48bHdDjH8D6d9e3Y8/P3j8N/f21y47dv73/uNEBPf4BrH93fTv2/Oz909DfX7vs2P3b&#x2B;48bHdDjH8D6d9e3Y8/P3j8N/f21y47dv73/uNEBPf4BrH93fTv2/Oz909DfX7vs2P3b&#x2B;48bHdDjH8D6d9e3Y8/P3j8N/f21y47dv73/uNEBPf4BrH93fTv2/Oz909DfX7vs2P3b&#x2B;48bHdDjH8D6d9e3Y8/P3j8N/f21y47dv73/uNEBPf4BrH93fTv2/Oz909DfX7vs2P3b&#x2B;48bHdDjH8D6d9e3Y8/P3j8N/f21y47dv73/uNEBPf4BrH93fTv2/Oz909DfX7vs2P3b&#x2B;48bHdDjH8D6d9e3Y8/P3j8N/f21y47dv73/uNEBPf4BrH93fTv2/Oz909DfX7vs2P3b&#x2B;48bHdAf&#x2B;AiSC0j3T6v82Pzs0PnT71d9/g3N/mno/GnFjQ7oDwyx&#x2B;QNoV/mx&#x2B;dmh86ffr/r8G5r909D504obHdAfGGLzB9Cu8mPzs0PnT79f9fk3NPunofOnFTc6oD8wxOYPoF3lx&#x2B;Znh86ffr/q829o9k9D508rbnRAf2CIzR9Au8qPzc8OnT/9ftXn39Dsn4bOn1bc6ID&#x2B;wBCbP4B2lR&#x2B;bnx06f/r9qs&#x2B;/odk/DZ0/rbjRAf2BITZ/AO0qPzY/O3T&#x2B;9PtVn39Ds38aOn9acaMD&#x2B;gNDbP4A2lV&#x2B;bH526Pzp96s&#x2B;/4Zm/zR0/rTiRgf0B4bY/AG0q/zY/OzQ&#x2B;dPvV33&#x2B;Dc3&#x2B;aej8acWNDugPDLH5A2hX&#x2B;bH52aHzp9&#x2B;v&#x2B;vwbmv3T0PnTihsd0B8YYvMH0K7yY/OzQ&#x2B;dPv1/1&#x2B;Tc0&#x2B;6eh86cVNzqgPzDE5g&#x2B;gXeXH5meHzp9&#x2B;v&#x2B;rzb2j2T0PnTytudEB/YIjNH0C7yo/Nzw6dP/1&#x2B;1eff0Oyfhs6fVtzogP7AEJs/gHaVH5ufHTp/&#x2B;v2qz7&#x2B;h2T8NnT&#x2B;tuNEB/YEhNn8A7So/Nj87dP70&#x2B;1Wff0Ozfxo6f1pxowP6A0Ns/gDaVX5sfnbo/On3qz7/hmb/NHT&#x2B;tOLG/AF9hR7g9QW093&#x2B;F9m&#x2B;fP7q&#x2B;vX&#x2B;6/jr0/tHvX//tH0kH9BF6gNcX0N7/Fdq/ff7o&#x2B;vb&#x2B;6frr0PtHv3/9t38kHdBH6AFeX0B7/1do//b5o&#x2B;vb&#x2B;6frr0PvH/3&#x2B;9d/&#x2B;kXRAH6EHeH0B7f1fof3b54&#x2B;ub&#x2B;&#x2B;frr8OvX/0&#x2B;9d/&#x2B;0fSAX2EHuD1BbT3f4X2b58/ur69f7r&#x2B;OvT&#x2B;0e9f/&#x2B;0fSQf0EXqA1xfQ3v8V2r99/uj69v7p&#x2B;uvQ&#x2B;0e/f/23fyQd0EfoAV5fQHv/V2j/9vmj69v7p&#x2B;uvQ&#x2B;8f/f713/6RdEAfoQd4fQHt/V&#x2B;h/dvnj65v75&#x2B;uvw69f/T713/7R9IBfYQe4PUFtPd/hfZvnz&#x2B;6vr1/uv469P7R71//7R9JB/QReoDXF9De/xXav33&#x2B;6Pr2/un669D7R79//bd/JB3QR&#x2B;gBXl9Ae/9XaP/2&#x2B;aPr2/un669D7x/9/vXf/pF0QB&#x2B;hB3h9Ae39X6H92&#x2B;ePrm/vn66/Dr1/9PvXf/tH0gF9hB7g9QW093&#x2B;F9m&#x2B;fP7q&#x2B;vX&#x2B;6/jr0/tHvX//tH0kH9BF6gNcX0N7/Fdq/ff7o&#x2B;vb&#x2B;6frr0PtHv3/9t38kHdBH6AFeX0B7/1do//b5o&#x2B;vb&#x2B;6frr0PvH/3&#x2B;9d/&#x2B;kXRAH6EHeH0B7f1fof3b54&#x2B;ub&#x2B;&#x2B;frr8OvX/0&#x2B;9d/&#x2B;0cyf0DbB7D&#x2B;q0/Wt4um/t317dD5tf/u/tfpgJYPcP1Xn6xvF039u&#x2B;vbofNr/939r9MBLR/g&#x2B;q8&#x2B;Wd8umvp317dD59f&#x2B;u/tfpwNaPsD1X32yvl009e&#x2B;ub4fOr/13979OB7R8gOu/&#x2B;mR9u2jq313fDp1f&#x2B;&#x2B;/uf50OaPkA13/1yfp20dS/u74dOr/2393/Oh3Q8gGu/&#x2B;qT9e2iqX93fTt0fu2/u/91OqDlA1z/1Sfr20VT/&#x2B;76duj82n93/&#x2B;t0QMsHuP6rT9a3i6b&#x2B;3fXt0Pm1/&#x2B;7&#x2B;1&#x2B;mAlg9w/VefrG8XTf2769uh82v/3f2v0wEtH&#x2B;D6rz5Z3y6a&#x2B;nfXt0Pn1/67&#x2B;1&#x2B;nA1o&#x2B;wPVffbK&#x2B;XTT1765vh86v/Xf3v04HtHyA67/6ZH27aOrfXd8OnV/77&#x2B;5/nQ5o&#x2B;QDXf/XJ&#x2B;nbR1L&#x2B;7vh06v/bf3f86HdDyAa7/6pP17aKpf3d9O3R&#x2B;7b&#x2B;7/3U6oOUDXP/VJ&#x2B;vbRVP/7vp26Pzaf3f/68wf0FfoDwC9gHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;dvpgD5CLwC9QHR9uv&#x2B;0PX/lx7Lev100dP/r&#x2B;duZP6DpAaTr0/3Tsvu390/LDu2ffr/knn/av13B0gENDzBdn&#x2B;6flt2/vX9admj/9Psl9/zT/u0Klg5oeIDp&#x2B;nT/tOz&#x2B;7f3TskP7p98vueef9m9XsHRAwwNM16f7p2X3b&#x2B;&#x2B;flh3aP/1&#x2B;yT3/tH&#x2B;7gqUDGh5guj7dPy27f3v/tOzQ/un3S&#x2B;75p/3bFSwd0PAA0/Xp/mnZ/dv7p2WH9k&#x2B;/X3LPP&#x2B;3frmDpgIYHmK5P90/L7t/ePy07tH/6/ZJ7/mn/dgVLBzQ8wHR9un9adv/2/mnZof3T75fc80/7tytYOqDhAabr0/3Tsvu390/LDu2ffr/knn/av13B0gENDzBdn&#x2B;6flt2/vX9admj/9Psl9/zT/u0Klg5oeIDp&#x2B;nT/tOz&#x2B;7f3TskP7p98vueef9m9XsHRAwwNM16f7p2X3b&#x2B;&#x2B;flh3aP/1&#x2B;yT3/tH&#x2B;7gqUDGh5guj7dPy27f3v/tOzQ/un3S&#x2B;75p/3bFSwd0PAA0/Xp/mnZ/dv7p2WH9k&#x2B;/X3LPP&#x2B;3frmDpgIYHmK5P90/L7t/ePy07tH/6/ZJ7/mn/dgVLBzQ8wHR9un9adv/2/mnZof3T75fc80/7tytYOqA/sATLskPnty77&#x2B;9mx&#x2B;1/v3y47dH7r&#x2B;V/pgP7AEC7LDp3fuuzvZ8fuf71/u&#x2B;zQ&#x2B;a3nf6UD&#x2B;gNDuCw7dH7rsr&#x2B;fHbv/9f7tskPnt57/lQ7oDwzhsuzQ&#x2B;a3L/n527P7X&#x2B;7fLDp3fev5XOqA/MITLskPnty77&#x2B;9mx&#x2B;1/v3y47dH7r&#x2B;V/pgP7AEC7LDp3fuuzvZ8fuf71/u&#x2B;zQ&#x2B;a3nf6UD&#x2B;gNDuCw7dH7rsr&#x2B;fHbv/9f7tskPnt57/lQ7oDwzhsuzQ&#x2B;a3L/n527P7X&#x2B;7fLDp3fev5XOqA/MITLskPnty77&#x2B;9mx&#x2B;1/v3y47dH7r&#x2B;V/pgP7AEC7LDp3fuuzvZ8fuf71/u&#x2B;zQ&#x2B;a3nf6UD&#x2B;gNDuCw7dH7rsr&#x2B;fHbv/9f7tskPnt57/lQ7oDwzhsuzQ&#x2B;a3L/n527P7X&#x2B;7fLDp3fev5XOqA/MITLskPnty77&#x2B;9mx&#x2B;1/v3y47dH7r&#x2B;V/pgP7AEC7LDp3fuuzvZ8fuf71/u&#x2B;zQ&#x2B;a3nf6UD&#x2B;gNDuCw7dH7rsr&#x2B;fHbv/9f7tskPnt57/lQ7oDwzhsuzQ&#x2B;a3L/n527P7X&#x2B;7fLDp3fev5X5g/oKw3wDdo//X60fzvlH/E79P7QsucXLB3QR1qgG7R/&#x2B;v1o/3bKP&#x2B;J36P2hZc8vWDqgj7RAN2j/9PvR/u2Uf8Tv0PtDy55fsHRAH2mBbtD&#x2B;6fej/dsp/4jfofeHlj2/YOmAPtIC3aD90&#x2B;9H&#x2B;7dT/hG/Q&#x2B;8PLXt&#x2B;wdIBfaQFukH7p9&#x2B;P9m&#x2B;n/CN&#x2B;h94fWvb8gqUD&#x2B;kgLdIP2T78f7d9O&#x2B;Uf8Dr0/tOz5BUsH9JEW6Abtn34/2r&#x2B;d8o/4HXp/aNnzC5YO6CMt0A3aP/1&#x2B;tH875R/xO/T&#x2B;0LLnFywd0EdaoBu0f/r9aP92yj/id&#x2B;j9oWXPL1g6oI&#x2B;0QDdo//T70f7tlH/E79D7Q8ueX7B0QB9pgW7Q/un3o/3bKf&#x2B;I36H3h5Y9v2DpgD7SAt2g/dPvR/u3U/4Rv0PvDy17fsHSAX2kBbpB&#x2B;6ffj/Zvp/wjfofeH1r2/IKlA/pIC3SD9k&#x2B;/H&#x2B;3fTvlH/A69P7Ts&#x2B;QVLB/SRFugG7Z9&#x2B;P9q/nfKP&#x2B;B16f2jZ8wuW&#x2B;QOaHmC6vh17fn2AWcr/hj0/un&#x2B;7aNb9B0sHtPwDvo49v34ALOV/w54f3b9dNOv&#x2B;g6UDWv4BX8eeXz8AlvK/Yc&#x2B;P7t8umnX/wdIBLf&#x2B;Ar2PPrx8AS/nfsOdH928Xzbr/YOmAln/A17Hn1w&#x2B;Apfxv2POj&#x2B;7eLZt1/sHRAyz/g69jz6wfAUv437PnR/dtFs&#x2B;4/WDqg5R/wdez59QNgKf8b9vzo/u2iWfcfLB3Q8g/4Ovb8&#x2B;gGwlP8Ne350/3bRrPsPlg5o&#x2B;Qd8HXt&#x2B;/QBYyv&#x2B;GPT&#x2B;6f7to1v0HSwe0/AO&#x2B;jj2/fgAs5X/Dnh/dv1006/6DpQNa/gFfx55fPwCW8r9hz4/u3y6adf/B0gEt/4CvY8&#x2B;vHwBL&#x2B;d&#x2B;w50f3bxfNuv9g6YCWf8DXsefXD4Cl/G/Y86P7t4tm3X&#x2B;wdEDLP&#x2B;Dr2PPrB8BS/jfs&#x2B;dH920Wz7j9YOqDlH/B17Pn1A2Ap/xv2/Oj&#x2B;7aJZ9x8sHdDyD/g69vz6AbCU/w17fnT/dtGs&#x2B;w&#x2B;WDmj5Ata/278dOn/6/ej&#x2B;8&#x2B;9W&#x2B;bvzj206oOULXP9u/3bo/On3o/vPv1vl784/tumAli9w/bv926Hzp9&#x2B;P7j//bpW/O//YpgNavsD17/Zvh86Sb1psAAAgAElEQVSffj&#x2B;6//y7Vf7u/GObDmj5Ate/278dOn/6/ej&#x2B;8&#x2B;9W&#x2B;bvzj206oOULXP9u/3bo/On3o/vPv1vl784/tumAli9w/bv926Hzp9&#x2B;P7j//bpW/O//YpgNavsD17/Zvh86ffj&#x2B;6//y7Vf7u/GObDmj5Ate/278dOn/6/ej&#x2B;8&#x2B;9W&#x2B;bvzj206oOULXP9u/3bo/On3o/vPv1vl784/tumAli9w/bv926Hzp9&#x2B;P7j//bpW/O//YpgNavsD17/Zvh86ffj&#x2B;6//y7Vf7u/GObDmj5Ate/278dOn/6/ej&#x2B;8&#x2B;9W&#x2B;bvzj206oOULXP9u/3bo/On3o/vPv1vl784/tumAli9w/bv926Hzp9&#x2B;P7j//bpW/O//YpgNavsD17/Zvh86ffj&#x2B;6//y7Vf7u/GObDug&#x2B;gH3AxND50/ND&#x2B;6eh86Pzp&#x2B;vT/dP&#x2B;1&#x2B;vT/dv92&#x2B;mAln8A7IobdP70/ND&#x2B;aej86Pzp&#x2B;nT/tP/1&#x2B;nT/dv92OqDlHwC74gadPz0/tH8aOj86f7o&#x2B;3T/tf70&#x2B;3b/dv50OaPkHwK64QedPzw/tn4bOj86frk/3T/tfr0/3b/dvpwNa/gGwK27Q&#x2B;dPzQ/unofOj86fr0/3T/tfr0/3b/dvpgJZ/AOyKG3T&#x2B;9PzQ/mno/Oj86fp0/7T/9fp0/3b/djqg5R8Au&#x2B;IGnT89P7R/Gjo/On&#x2B;6Pt0/7X&#x2B;9Pt2/3b&#x2B;dDmj5B8CuuEHnT88P7Z&#x2B;Gzo/On65P90/7X69P92/3b6cDWv4BsCtu0PnT80P7p6Hzo/On69P90/7X69P92/3b6YCWfwDsiht0/vT80P5p6Pzo/On6dP&#x2B;0//X6dP92/3Y6oOUfALviBp0/PT&#x2B;0fxo6Pzp/uj7dP&#x2B;1/vT7dv92/nQ5o&#x2B;QfArrhB50/PD&#x2B;2fhs6Pzp&#x2B;uT/dP&#x2B;1&#x2B;vT/dv92&#x2B;nA1r&#x2B;AbArbtD50/ND&#x2B;6eh86Pzp&#x2B;vT/dP&#x2B;1&#x2B;vT/dv92&#x2B;mAln8A7IobdP70/ND&#x2B;aej86Pzp&#x2B;nT/tP/1&#x2B;nT/dv92OqDlHwC74gadPz0/tH8aOj86f7o&#x2B;3T/tf70&#x2B;3b/dv50OaPkHwK64QedPzw/tn4bOj86frk/3T/tfr0/3b/dvpwN6/AOwXt8O/QGm389en&#x2B;6f9k&#x2B;z/n5X1vOz&#x2B;6fr2&#x2B;mAHh/g9fp26A84/X72&#x2B;nT/tH&#x2B;a9fe7sp6f3T9d304H9PgAr9e3Q3/A6fez16f7p/3TrL/flfX87P7p&#x2B;nY6oMcHeL2&#x2B;HfoDTr&#x2B;fvT7dP&#x2B;2fZv39rqznZ/dP17fTAT0&#x2B;wOv17dAfcPr97PXp/mn/NOvvd2U9P7t/ur6dDujxAV6vb4f&#x2B;gNPvZ69P90/7p1l/vyvr&#x2B;dn90/XtdECPD/B6fTv0B5x&#x2B;P3t9un/aP836&#x2B;11Zz8/un65vpwN6fIDX69uhP&#x2B;D0&#x2B;9nr0/3T/mnW3&#x2B;/Ken52/3R9Ox3Q4wO8Xt8O/QGn389en&#x2B;6f9k&#x2B;z/n5X1vOz&#x2B;6fr2&#x2B;mAHh/g9fp26A84/X72&#x2B;nT/tH&#x2B;a9fe7sp6f3T9d304H9PgAr9e3Q3/A6fez16f7p/3TrL/flfX87P7p&#x2B;nY6oMcHeL2&#x2B;HfoDTr&#x2B;fvT7dP&#x2B;2fZv39rqznZ/dP17fTAT0&#x2B;wOv17dAfcPr97PXp/mn/NOvvd2U9P7t/ur6dDujxAV6vb4f&#x2B;gNPvZ69P90/7p1l/vyvr&#x2B;dn90/XtdECPD/B6fTv0B5x&#x2B;P3t9un/aP836&#x2B;11Zz8/un65vpwN6fIDX69uhP&#x2B;D0&#x2B;9nr0/3T/mnW3&#x2B;/Ken52/3R9O/MH9BX7APYBYKHzp/Nbr0/3v&#x2B;6frk/L7t/eP&#x2B;0/bnRAH7EvgP0DQNen&#x2B;6dF&#x2B;7fXp/tf90/Xp2X3b&#x2B;&#x2B;f9h83OqCP2BfA/gGg69P906L92&#x2B;vT/a/7p&#x2B;vTsvu390/7jxsd0EfsC2D/AND16f5p0f7t9en&#x2B;1/3T9WnZ/dv7p/3HjQ7oI/YFsH8A6Pp0/7Ro//b6dP/r/un6tOz&#x2B;7f3T/uNGB/QR&#x2B;wLYPwB0fbp/WrR/e326/3X/dH1adv/2/mn/caMD&#x2B;oh9AewfALo&#x2B;3T8t2r&#x2B;9Pt3/un&#x2B;6Pi27f3v/tP&#x2B;40QF9xL4A9g8AXZ/unxbt316f7n/dP12flt2/vX/af9zogD5iXwD7B4CuT/dPi/Zvr0/3v&#x2B;6frk/L7t/eP&#x2B;0/bnRAH7EvgP0DQNen&#x2B;6dF&#x2B;7fXp/tf90/Xp2X3b&#x2B;&#x2B;f9h83OqCP2BfA/gGg69P906L92&#x2B;vT/a/7p&#x2B;vTsvu390/7jxsd0EfsC2D/AND16f5p0f7t9en&#x2B;1/3T9WnZ/dv7p/3HjQ7oI/YFsH8A6Pp0/7Ro//b6dP/r/un6tOz&#x2B;7f3T/uNGB/QR&#x2B;wLYPwB0fbp/WrR/e326/3X/dH1adv/2/mn/caMD&#x2B;oh9AewfALo&#x2B;3T8t2r&#x2B;9Pt3/un&#x2B;6Pi27f3v/tP&#x2B;40QF9xL4A9g8AXZ/unxbt316f7n/dP12flt2/vX/af9yYP6AbYBb6A0S//3p9un9aNLR/u2jo/un6ESQd0H0AUOgfIP3&#x2B;6/Xp/mnR0P7toqH7p&#x2B;tHkHRA9wFAoX&#x2B;A9Puv16f7p0VD&#x2B;7eLhu6frh9B0gHdBwCF/gHS779en&#x2B;6fFg3t3y4aun&#x2B;6fgRJB3QfABT6B0i//3p9un9aNLR/u2jo/un6ESQd0H0AUOgfIP3&#x2B;6/Xp/mnR0P7toqH7p&#x2B;tHkHRA9wFAoX&#x2B;A9Puv16f7p0VD&#x2B;7eLhu6frh9B0gHdBwCF/gHS779en&#x2B;6fFg3t3y4aun&#x2B;6fgRJB3QfABT6B0i//3p9un9aNLR/u2jo/un6ESQd0H0AUOgfIP3&#x2B;6/Xp/mnR0P7toqH7p&#x2B;tHkHRA9wFAoX&#x2B;A9Puv16f7p0VD&#x2B;7eLhu6frh9B0gHdBwCF/gHS779en&#x2B;6fFg3t3y4aun&#x2B;6fgRJB3QfABT6B0i//3p9un9aNLR/u2jo/un6ESQd0H0AUOgfIP3&#x2B;6/Xp/mnR0P7toqH7p&#x2B;tHkHRA9wFAoX&#x2B;A9Puv16f7p0VD&#x2B;7eLhu6frh9B0gHdBwCF/gHS779en&#x2B;6fFg3t3y4aun&#x2B;6fgTJ/AF9xf4Bt/ef/7hAv599/tb7t9e3Y8&#x2B;P3h97fjQd0EfsA2zvP/9xgX4/&#x2B;/yt92&#x2B;vb8eeH70/9vxoOqCP2AfY3n/&#x2B;4wL9fvb5W&#x2B;/fXt&#x2B;OPT96f&#x2B;z50XRAH7EPsL3//McF&#x2B;v3s87fev72&#x2B;HXt&#x2B;9P7Y86PpgD5iH2B7//mPC/T72edvvX97fTv2/Oj9sedH0wF9xD7A9v7zHxfo97PP33r/9vp27PnR&#x2B;2PPj6YD&#x2B;oh9gO395z8u0O9nn7/1/u317djzo/fHnh9NB/QR&#x2B;wDb&#x2B;89/XKDfzz5/6/3b69ux50fvjz0/mg7oI/YBtvef/7hAv599/tb7t9e3Y8&#x2B;P3h97fjQd0EfsA2zvP/9xgX4/&#x2B;/yt92&#x2B;vb8eeH70/9vxoOqCP2AfY3n/&#x2B;4wL9fvb5W&#x2B;/fXt&#x2B;OPT96f&#x2B;z50XRAH7EPsL3//McF&#x2B;v3s87fev72&#x2B;HXt&#x2B;9P7Y86PpgD5iH2B7//mPC/T72edvvX97fTv2/Oj9sedH0wF9xD7A9v7zHxfo97PP33r/9vp27PnR&#x2B;2PPj6YD&#x2B;oh9gO395z8u0O9nn7/1/u317djzo/fHnh9NB/QR&#x2B;wDb&#x2B;89/XKDfzz5/6/3b69ux50fvjz0/mvkDmh4g&#x2B;wKs90/Xp0VD90/Xp6H92&#x2B;vToqH906Lzixsd0PIFqH&#x2B;2f7o&#x2B;LRq6f7o&#x2B;De3fXp8WDe2fFp1f3OiAli9A/bP90/Vp0dD90/VpaP/2&#x2B;rRoaP&#x2B;06PziRge0fAHqn&#x2B;2frk&#x2B;Lhu6frk9D&#x2B;7fXp0VD&#x2B;6dF5xc3OqDlC1D/bP90fVo0dP90fRrav70&#x2B;LRraPy06v7jRAS1fgPpn&#x2B;6fr06Kh&#x2B;6fr09D&#x2B;7fVp0dD&#x2B;adH5xY0OaPkC1D/bP12fFg3dP12fhvZvr0&#x2B;LhvZPi84vbnRAyxeg/tn&#x2B;6fq0aOj&#x2B;6fo0tH97fVo0tH9adH5xowNavgD1z/ZP16dFQ/dP16eh/dvr06Kh/dOi84sbHdDyBah/tn&#x2B;6Pi0aun&#x2B;6Pg3t316fFg3tnxadX9zogJYvQP2z/dP1adHQ/dP1aWj/9vq0aGj/tOj84kYHtHwB6p/tn65Pi4bun65PQ/u316dFQ/unRecXNzqg5QtQ/2z/dH1aNHT/dH0a2r&#x2B;9Pi0a2j8tOr&#x2B;40QEtX4D6Z/un69Oiofun69PQ/u31adHQ/mnR&#x2B;cWNDmj5AtQ/2z9dnxYN3T9dn4b2b69Pi4b2T4vOL250QMsXoP7Z/un6tGjo/un6NLR/e31aNLR/WnR&#x2B;caMD&#x2B;gNLZF4Aun86f9q/PT&#x2B;6f7o&#x2B;3b/dv100tP910e8XNzqgP7BE5gWg&#x2B;6fzp/3b86P7p&#x2B;vT/dv920VD&#x2B;18X/X5xowP6A0tkXgC6fzp/2r89P7p/uj7dv92/XTS0/3XR7xc3OqA/sETmBaD7p/On/dvzo/un69P92/3bRUP7Xxf9fnGjA/oDS2ReALp/On/avz0/un&#x2B;6Pt2/3b9dNLT/ddHvFzc6oD&#x2B;wROYFoPun86f92/Oj&#x2B;6fr0/3b/dtFQ/tfF/1&#x2B;caMD&#x2B;gNLZF4Aun86f9q/PT&#x2B;6f7o&#x2B;3b/dv100tP910e8XNzqgP7BE5gWg&#x2B;6fzp/3b86P7p&#x2B;vT/dv920VD&#x2B;18X/X5xowP6A0tkXgC6fzp/2r89P7p/uj7dv92/XTS0/3XR7xc3OqA/sETmBaD7p/On/dvzo/un69P92/3bRUP7Xxf9fnGjA/oDS2ReALp/On/avz0/un&#x2B;6Pt2/3b9dNLT/ddHvFzc6oD&#x2B;wROYFoPun86f92/Oj&#x2B;6fr0/3b/dtFQ/tfF/1&#x2B;caMD&#x2B;gNLZF4Aun86f9q/PT&#x2B;6f7o&#x2B;3b/dv100tP910e8XNzqgP7BE5gWg&#x2B;6fzp/3b86P7p&#x2B;vT/dv920VD&#x2B;18X/X5xowP6A0tkXgC6fzp/2r89P7p/uj7dv92/XTS0/3XR7xc3OqA/sETmBaD7p/On/dvzo/un69P92/3bRUP7Xxf9fnFj/oC2s/4BoGX3T0P3b69P90&#x2B;z7v8KPX/r71d&#x2B;bjqg5dgXkO5/3T8N3b&#x2B;9Pt0/zbr/K/T8rb9f&#x2B;bnpgJZjX0C6/3X/NHT/9vp0/zTr/q/Q87f&#x2B;fuXnpgNajn0B6f7X/dPQ/dvr0/3TrPu/Qs/f&#x2B;vuVn5sOaDn2BaT7X/dPQ/dvr0/3T7Pu/wo9f&#x2B;vvV35uOqDl2BeQ7n/dPw3dv70&#x2B;3T/Nuv8r9Pytv1/5uemAlmNfQLr/df80dP/2&#x2B;nT/NOv&#x2B;r9Dzt/5&#x2B;5eemA1qOfQHp/tf909D92&#x2B;vT/dOs&#x2B;79Cz9/6&#x2B;5Wfmw5oOfYFpPtf909D92&#x2B;vT/dPs&#x2B;7/Cj1/6&#x2B;9Xfm46oOXYF5Duf90/Dd2/vT7dP826/yv0/K2/X/m56YCWY19Auv91/zR0//b6dP806/6v0PO3/n7l56YDWo59Aen&#x2B;1/3T0P3b69P906z7v0LP3/r7lZ&#x2B;bDmg59gWk&#x2B;1/3T0P3b69P90&#x2B;z7v8KPX/r71d&#x2B;bjqg5dgXkO5/3T8N3b&#x2B;9Pt0/zbr/K/T8rb9f&#x2B;bnpgJZjX0C6/3X/NHT/9vp0/zTr/q/Q87f&#x2B;fuXnpgNajn0B6f7X/dPQ/dvr0/3TrPu/Qs/f&#x2B;vuVn5sOaBh6Aej669Af0HXR70fXp0VD90/Xp/un/dvr0/2v0wENQy8AXX8d&#x2B;gO6Lvr96Pq0aOj&#x2B;6fp0/7R/e326/3U6oGHoBaDrr0N/QNdFvx9dnxYN3T9dn&#x2B;6f9m&#x2B;vT/e/Tgc0DL0AdP116A/ouuj3o&#x2B;vToqH7p&#x2B;vT/dP&#x2B;7fXp/tfpgIahF4Cuvw79AV0X/X50fVo0dP90fbp/2r&#x2B;9Pt3/Oh3QMPQC0PXXoT&#x2B;g66Lfj65Pi4bun65P90/7t9en&#x2B;1&#x2B;nAxqGXgC6/jr0B3Rd9PvR9WnR0P3T9en&#x2B;af/2&#x2B;nT/63RAw9ALQNdfh/6Arot&#x2B;P7o&#x2B;LRq6f7o&#x2B;3T/t316f7n&#x2B;dDmgYegHo&#x2B;uvQH9B10e9H16dFQ/dP16f7p/3b69P9r9MBDUMvAF1/HfoDui76/ej6tGjo/un6dP&#x2B;0f3t9uv91OqBh6AWg669Df0DXRb8fXZ8WDd0/XZ/un/Zvr0/3v04HNAy9AHT9degP6Lro96Pr06Kh&#x2B;6fr0/3T/u316f7X6YCGoReArr8O/QFdF/1&#x2B;dH1aNHT/dH26f9q/vT7d/zod0DD0AtD116E/oOui34&#x2B;uT4uG7p&#x2B;uT/dP&#x2B;7fXp/tfpwMahl4Auv469Ad0XfT70fVp0dD90/Xp/mn/9vp0/&#x2B;t0QMPQC0DXX4f&#x2B;gK6Lfj&#x2B;6Pi0aun&#x2B;6Pt0/7d9en&#x2B;5/nfkDmh7gtP0BoP1X312f7t/uv/ySWfT8rNMB/YElSLsLTPuvvrs&#x2B;3b/df/kls&#x2B;j5WacD&#x2B;gNLkHYXmPZffXd9un&#x2B;7//JLZtHzs04H9AeWIO0uMO2/&#x2B;u76dP92/&#x2B;WXzKLnZ50O6A8sQdpdYNp/9d316f7t/ssvmUXPzzod0B9YgrS7wLT/6rvr0/3b/ZdfMouen3U6oD&#x2B;wBGl3gWn/1XfXp/u3&#x2B;y&#x2B;/ZBY9P&#x2B;t0QH9gCdLuAtP&#x2B;q&#x2B;&#x2B;uT/dv919&#x2B;ySx6ftbpgP7AEqTdBab9V99dn&#x2B;7f7r/8kln0/KzTAf2BJUi7C0z7r767Pt2/3X/5JbPo&#x2B;VmnA/oDS5B2F5j2X313fbp/u//yS2bR87NOB/QHliDtLjDtv/ru&#x2B;nT/dv/ll8yi52edDugPLEHaXWDaf/Xd9en&#x2B;7f7LL5lFz886HdAfWIK0u8C0/&#x2B;q769P92/2XXzKLnp91OqA/sARpd4Fp/9V316f7t/svv2QWPT/rdEB/YAnS7gLT/qvvrk/3b/dffsksen7WmT&#x2B;gYxv6A0iLzm8d&#x2B;v1p0fnR9e392&#x2B;n94kIHdExDf0Bp0fmtQ78/LTo/ur69fzu9X1zogI5p6A8oLTq/dej3p0XnR9e392&#x2B;n94sLHdAxDf0BpUXntw79/rTo/Oj69v7t9H5xoQM6pqE/oLTo/Nah358WnR9d396/nd4vLnRAxzT0B5QWnd869PvTovOj69v7t9P7xYUO6JiG/oDSovNbh35/WnR&#x2B;dH17/3Z6v7jQAR3T0B9QWnR&#x2B;69DvT4vOj65v799O7xcXOqBjGvoDSovObx36/WnR&#x2B;dH17f3b6f3iQgd0TEN/QGnR&#x2B;a1Dvz8tOj&#x2B;6vr1/O71fXOiAjmnoDygtOr916PenRedH17f3b6f3iwsd0DEN/QGlRee3Dv3&#x2B;tOj86Pr2/u30fnGhAzqmoT&#x2B;gtOj81qHfnxadH13f3r&#x2B;d3i8udEDHNPQHlBad3zr0&#x2B;9Oi86Pr2/u30/vFhQ7omIb&#x2B;gNKi81uHfn9adH50fXv/dnq/uNABHdPQH1BadH7r0O9Pi86Prm/v307vFxfmD2h6gVIfgAv2/Oj&#x2B;6fml/duh86Pr2/u316cVLB3QH1iC1AfkV&#x2B;z50f3T80v7t0PnR9e392&#x2B;vTytYOqA/sASpD8iv2POj&#x2B;6fnl/Zvh86Prm/v316fVrB0QH9gCVIfkF&#x2B;x50f3T88v7d8OnR9d396/vT6tYOmA/sASpD4gv2LPj&#x2B;6fnl/avx06P7q&#x2B;vX97fVrB0gH9gSVIfUB&#x2B;xZ4f3T89v7R/O3R&#x2B;dH17//b6tIKlA/oDS5D6gPyKPT&#x2B;6f3p&#x2B;af926Pzo&#x2B;vb&#x2B;7fVpBUsH9AeWIPUB&#x2B;RV7fnT/9PzS/u3Q&#x2B;dH17f3b69MKlg7oDyxB6gPyK/b86P7p&#x2B;aX926Hzo&#x2B;vb&#x2B;7fXpxUsHdAfWILUB&#x2B;RX7PnR/dPzS/u3Q&#x2B;dH17f3b69PK1g6oD&#x2B;wBKkPyK/Y86P7p&#x2B;eX9m&#x2B;Hzo&#x2B;ub&#x2B;/fXp9WsHRAf2AJUh&#x2B;QX7HnR/dPzy/t3w6dH13f3r&#x2B;9Pq1g6YD&#x2B;wBKkPiC/Ys&#x2B;P7p&#x2B;eX9q/HTo/ur69f3t9WsHSAf2BJUh9QH7Fnh/dPz2/tH87dH50fXv/9vq0gqUD&#x2B;gNLkPqA/Io9P7p/en5p/3bo/Oj69v7t9WkFSwf0B5Yg9QH5FXt&#x2B;dP/0/NL&#x2B;7dD50fXt/dvr0wqWDugGGGU9f9o/Xb/&#x2B;t9&#x2B;/&#x2B;tv1aWj/1/q01umAboBQ1vOn/dP163/7/au/XZ&#x2B;G9n&#x2B;tT2udDugGCGU9f9o/Xb/&#x2B;t9&#x2B;/&#x2B;tv1aWj/1/q01umAboBQ1vOn/dP163/7/au/XZ&#x2B;G9n&#x2B;tT2udDugGCGU9f9o/Xb/&#x2B;t9&#x2B;/&#x2B;tv1aWj/1/q01umAboBQ1vOn/dP163/7/au/XZ&#x2B;G9n&#x2B;tT2udDugGCGU9f9o/Xb/&#x2B;t9&#x2B;/&#x2B;tv1aWj/1/q01umAboBQ1vOn/dP163/7/au/XZ&#x2B;G9n&#x2B;tT2udDugGCGU9f9o/Xb/&#x2B;t9&#x2B;/&#x2B;tv1aWj/1/q01umAboBQ1vOn/dP163/7/au/XZ&#x2B;G9n&#x2B;tT2udDugGCGU9f9o/Xb/&#x2B;t9&#x2B;/&#x2B;tv1aWj/1/q01umAboBQ1vOn/dP163/7/au/XZ&#x2B;G9n&#x2B;tT2udDugGCGU9f9o/Xb/&#x2B;t9&#x2B;/&#x2B;tv1aWj/1/q01umAboBQ1vOn/dP163/7/au/XZ&#x2B;G9n&#x2B;tT2udDugGCGU9f9o/Xb/&#x2B;t9&#x2B;/&#x2B;tv1aWj/1/q01umAboBQ1vOn/dP163/7/au/XZ&#x2B;G9n&#x2B;tT2udDugWSO2frm8XnR8NnT8tGtq/Pb8rdH6p&#x2B;TXTAQ0PIL1Adv90fbvo/Gjo/GnR0P7t&#x2B;V2h80vNr5kOaHgA6QWy&#x2B;6fr20XnR0PnT4uG9m/P7wqdX2p&#x2B;zXRAwwNIL5DdP13fLjo/Gjp/WjS0f3t&#x2B;V&#x2B;j8UvNrpgMaHkB6gez&#x2B;6fp20fnR0PnToqH92/O7QueXml8zHdDwANILZPdP17eLzo&#x2B;Gzp8WDe3fnt8VOr/U/JrpgIYHkF4gu3&#x2B;6vl10fjR0/rRoaP/2/K7Q&#x2B;aXm10wHNDyA9ALZ/dP17aLzo6Hzp0VD&#x2B;7fnd4XOLzW/Zjqg4QGkF8jun65vF50fDZ0/LRravz2/K3R&#x2B;qfk10wENDyC9QHb/dH276Pxo6Pxp0dD&#x2B;7fldofNLza&#x2B;ZDmh4AOkFsvun69tF50dD50&#x2B;LhvZvz&#x2B;8KnV9qfs10QMMDSC&#x2B;Q3T9d3y46Pxo6f1o0tH97flfo/FLza6YDGh5AeoHs/un6dtH50dD506Kh/dvzu0Lnl5pfMx3Q8ADSC2T3T9e3i86Phs6fFg3t357fFTq/1Pya6YCGB5BeILt/ur5ddH40dP60aGj/9vyu0Pml5tdMBzQ8gPQC2f3T9e2i86Oh86dFQ/u353eFzi81v2Y6oOEBpBfI7p&#x2B;m/MvPXJ&#x2B;WnfK7Yc9vvf46HdDyBaBF&#x2B;6cp//Iz16dlp/xu2PNbr79OB7R8AWjR/mnKv/zM9WnZKb8b9vzW66/TAS1fAFq0f5ryLz9zfVp2yu&#x2B;GPb/1&#x2B;ut0QMsXgBbtn6b8y89cn5ad8rthz2&#x2B;9/jod0PIFoEX7pyn/8jPXp2Wn/G7Y81uvv04HtHwBaNH&#x2B;acq//Mz1adkpvxv2/Nbrr9MBLV8AWrR/mvIvP3N9WnbK74Y9v/X663RAyxeAFu2fpvzLz1yflp3yu2HPb73&#x2B;Oh3Q8gWgRfunKf/yM9enZaf8btjzW6&#x2B;/Tge0fAFo0f5pyr/8zPVp2Sm/G/b81uuv0wEtXwBatH&#x2B;a8i8/c31adsrvhj2/9frrdEDLF4AW7Z&#x2B;m/MvPXJ&#x2B;WnfK7Yc9vvf46HdDyBaBF&#x2B;6cp//Iz16dlp/xu2PNbr79OB7R8AWjR/mnKv/zM9WnZKb8b9vzW66/TAS1fAFq0f5ryLz9zfVp2yu&#x2B;GPb/1&#x2B;ut0QMsXgBbt3w79fvb8af&#x2B;01vOjofun87drPf&#x2B;40QHdAqr926Hfz54/7Z/Wen40dP90/nat5x83OqBbQLV/O/T72fOn/dNaz4&#x2B;G7p/O3671/ONGB3QLqPZvh34/e/60f1rr&#x2B;dHQ/dP527Wef9zogG4B1f7t0O9nz5/2T2s9Pxq6fzp/u9bzjxsd0C2g2r8d&#x2B;v3s&#x2B;dP&#x2B;aa3nR0P3T&#x2B;dv13r&#x2B;caMDugVU&#x2B;7dDv589f9o/rfX8aOj&#x2B;6fztWs8/bnRAt4Bq/3bo97PnT/untZ4fDd0/nb9d6/nHjQ7oFlDt3w79fvb8af&#x2B;01vOjofun87drPf&#x2B;40QHdAqr926Hfz54/7Z/Wen40dP90/nat5x83OqBbQLV/O/T72fOn/dNaz4&#x2B;G7p/O3671/ONGB3QLqPZvh34/e/60f1rr&#x2B;dHQ/dP527Wef9zogG4B1f7t0O9nz5/2T2s9Pxq6fzp/u9bzjxsd0C2g2r8d&#x2B;v3s&#x2B;dP&#x2B;aa3nR0P3T&#x2B;dv13r&#x2B;caMDugVU&#x2B;7dDv589f9o/rfX8aOj&#x2B;6fztWs8/bnRAt4Bq/3bo97PnT/untZ4fDd0/nb9d6/nHjQ7oBhCFzt/&#x2B;AVuvT2OfH9o/Dd3/&#x2B;vys0/u76YBuAFHo/O0fsPX6NPb5of3T0P2vz886vb&#x2B;bDugGEIXO3/4BW69PY58f2j8N3f/6/KzT&#x2B;7vpgG4AUej87R&#x2B;w9fo09vmh/dPQ/a/Pzzq9v5sO6AYQhc7f/gFbr09jnx/aPw3d//r8rNP7u&#x2B;mAbgBR6PztH7D1&#x2B;jT2&#x2B;aH909D9r8/POr2/mw7oBhCFzt/&#x2B;AVuvT2OfH9o/Dd3/&#x2B;vys0/u76YBuAFHo/O0fsPX6NPb5of3T0P2vz886vb&#x2B;bDugGEIXO3/4BW69PY58f2j8N3f/6/KzT&#x2B;7vpgG4AUej87R&#x2B;w9fo09vmh/dPQ/a/Pzzq9v5sO6AYQhc7f/gFbr09jnx/aPw3d//r8rNP7u&#x2B;mAbgBR6PztH7D1&#x2B;jT2&#x2B;aH909D9r8/POr2/mw7oBhCFzt/&#x2B;AVuvT2OfH9o/Dd3/&#x2B;vys0/u76YBuAFHo/O0fsPX6NPb5of3T0P2vz886vb&#x2B;bDugGEIXO3/4BW69PY58f2j8N3f/6/KzT&#x2B;7vpgG4AUej87R&#x2B;w9fo09vmh/dPQ/a/Pzzq9v5sOaHiA0/YHoPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmJiTkkYAAAK5SURBVHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWqcD&#x2B;gNDmHYXuPxY6PyTWzR0//b86f7tWmf&#x2B;gI6IiIiIeKEDOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh7ogI6IiIiIeKADOiIiIiLigQ7oiIiIiIgHOqAjIiIiIh74Dxr6/cFZT3tpAAAAAElFTkSuQmCC'>
+            </div>
+            <div class="mid-yqsj">
+                <div class="mid-jkm">
+                    <span>杭州健康码为<span style="color: green; font-size: 40px; text-decoration:underline;"
+                            onclick="GetInfo('Jkm')">&#x7EFF;&#x7801;</span></span>
+                </div>
+                <div class="mid-ym">
+                    <span>已完成<span class="ym-span" onclick="GetInfo('Ym')">&#x7B2C;3&#x9488;</span>疫苗接种</span>
+                </div>
+            </div>
+            <div class="mid-msg" style="background-color: rgb(153 239 125 / 20%)">
+                <span>&#x606D;&#x559C;&#x60A8;&#xFF0C;&#x4E00;&#x5207;&#x6B63;&#x5E38;~</span>
+            </div>
+        </div>
+        <!-- 中间内容区域 -->
+        <div class="bottom-info">
+            <div class="bottom-left">
+                <!-- 核酸 -->
+                <div class="bottom-hs"
+                    style="background: url('/yqfk/img/hs-green.png') no-repeat; background-size: 300px;">
+                    <div class="hs-sj">10-22 00:20</div>
+                    <div class="hs-jg"
+                        style="display: flex; align-items: center; flex-direction: row; justify-content: center; align-content: center;">
+                        <div style="font-size:130px;margin-right:5px">7</div>
+                        <div style="display: flex; align-items: flex-start; flex-direction: column">
+                            <div style="display:flex">&#x5929;&#x5916;</div>
+                            <div style="font-size: 50px;">&#x9634;&#x6027;</div>
+                        </div>
+                    </div>
+                    <div class="hs-mc">核酸检测<img src="/yqfk/img/edit.png" /></div>
+                </div>
+            </div>
+            <div class="bottom-right">
+                <!-- 行程码 -->
+                <div class="bottom-xcm">
+                    <div class="xcm-top">
+                        <div class="xcm-top-img">
+                            <img src="/yqfk/img/isgo.png" />
+                        </div>
+                        <div class="xcm-top-content">
+                            <div class="xcm-title">疫情重点地区核验</div>
+                            <div class="xcm-tips">近14天行程核验</div>
+                        </div>
+                    </div>
+                    <div id="xcm-hy">
+                        <div class="xcm-ljhq" onclick='alertOpen($("#yqfk-hy").html())'>立即获取</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 疫情防控地区核验 -->
+        <div hidden="hidden" id='yqfk-hy'>
+            <div class="yqfk-hy">
+                <div class='hy-mc'>疫情重点地区核验</div>
+                <div class='hy-sjh'><img src="/yqfk//img/mobile.png" /><input type="text" name='sjh' value="13456982338"
+                        placeholder="手机号码" /></div>
+                <div class='hy-yzm'><img src="/yqfk//img/mobile-yz.png" /><input type="text" name='yzm'
+                        placeholder="短信验证码" /><span onclick="getCode()" name="btn_yzm">获取验证码</span></div>
+                <div class='hy-qr' onclick='$(event.target).children(0).click();'><input type="checkbox"
+                        onclick='isCheck(this)' value="同意并授权运营商查询本人疫情数据" />同意并授权运营商查询本人通信行程卡数据</div>
+                <div class='hy-cx disabled1' onclick="getXcm()">查询</div>
+            </div>
+        </div>
+        <!-- 行程码短信验证传值 -->
+        <div hidden="hidden">
+            <div id='queryId'></div>
+            <div id='sendTime'></div>
+        </div>
+    </div>
 </body>
 
 </html>
