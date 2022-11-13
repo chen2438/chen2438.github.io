@@ -61,16 +61,16 @@ function updateConfig(userData, inputID, deptOBJ) {
     userDept.addEventListener('click', updateDept);
 
     function updateName() {
-        let upd = prompt('手动更新姓名：');
-        userName.textContent = upd;
+        let upd = prompt('更新姓名:(微信中"确定"在左边)');
+        if (upd) userName.textContent = upd;
     }
     function updateID() {
-        let upd = prompt('手动更新学号：');
-        userID.textContent = '学工号：' + upd;
+        let upd = prompt('更新学号:(微信中"确定"在左边)');
+        if (upd) userID.textContent = '学工号：' + upd;
     }
     function updateDept() {
-        let upd = prompt('手动更新学院：');
-        userDept.textContent = '学院/班级：' + upd;
+        let upd = prompt('更新学院:(微信中"确定"在左边)');
+        if (upd) userDept.textContent = '学院/班级：' + upd;
     }
 }
 
